@@ -11,7 +11,7 @@ use crate::{
 };
 use std::sync::Arc;
 
-use super::controls::KeyboardState;
+use super::controls::{update_controls, KeyboardState};
 
 #[derive(Debug)]
 pub(crate) struct State<'a> {
@@ -119,6 +119,7 @@ impl<'a> State<'a> {
     }
 
     pub(crate) fn update(&mut self) {
+        update_controls(self);
         update_view_params_buffer(self);
         update_cpu_read_buffers(self);
     }
