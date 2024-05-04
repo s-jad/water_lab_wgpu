@@ -4,6 +4,7 @@ use std::time;
 
 use winit::keyboard::{KeyCode, PhysicalKey};
 
+use crate::updates::param_updates::update_ray_params_buffer;
 use crate::updates::param_updates::update_view_params_buffer;
 
 use super::state::State;
@@ -13,6 +14,7 @@ pub(crate) enum KeyboardMode {
     DEBUG,
     VIEW,
     TERRAIN,
+    RAY,
     PRINT,
 }
 
@@ -185,6 +187,11 @@ pub(crate) fn update_controls(state: &mut State) {
         .key_pressed(PhysicalKey::Code(KeyCode::Digit2))
     {
         state.controls.set_mode(KeyboardMode::VIEW);
+    } else if state
+        .controls
+        .key_pressed(PhysicalKey::Code(KeyCode::Digit3))
+    {
+        state.controls.set_mode(KeyboardMode::RAY);
     } else if state.controls.key_pressed(PhysicalKey::Code(KeyCode::KeyP)) {
         state.controls.set_mode(KeyboardMode::PRINT);
     }
@@ -193,6 +200,7 @@ pub(crate) fn update_controls(state: &mut State) {
         KeyboardMode::DEBUG => debug_controls(state),
         KeyboardMode::VIEW => view_controls(state),
         KeyboardMode::TERRAIN => terrain_controls(state),
+        KeyboardMode::RAY => ray_controls(state),
         KeyboardMode::PRINT => print_controls(state),
     }
 }
@@ -207,7 +215,7 @@ fn debug_controls(state: &mut State) {
             "Debug",
         );
         thread::sleep(time::Duration::from_millis(50));
-        state.controls.set_mode(KeyboardMode::TERRAIN);
+        state.controls.set_mode(KeyboardMode::VIEW);
     } else if pressed.contains(&PhysicalKey::Code(KeyCode::Digit1)) {
         print_gpu_data::<[[f32; 4]; 512]>(
             &state.device,
@@ -215,7 +223,7 @@ fn debug_controls(state: &mut State) {
             "Debug",
         );
         thread::sleep(time::Duration::from_millis(50));
-        state.controls.set_mode(KeyboardMode::TERRAIN);
+        state.controls.set_mode(KeyboardMode::VIEW);
     } else if pressed.contains(&PhysicalKey::Code(KeyCode::Digit2)) {
         print_gpu_data::<[[f32; 4]; 512]>(
             &state.device,
@@ -223,7 +231,7 @@ fn debug_controls(state: &mut State) {
             "Debug",
         );
         thread::sleep(time::Duration::from_millis(50));
-        state.controls.set_mode(KeyboardMode::TERRAIN);
+        state.controls.set_mode(KeyboardMode::VIEW);
     } else if pressed.contains(&PhysicalKey::Code(KeyCode::Digit3)) {
         print_gpu_interleave_two_buffers::<[[f32; 4]; 512]>(
             &state.device,
@@ -231,29 +239,46 @@ fn debug_controls(state: &mut State) {
             &state.buffers.cpu_read_debug_array2,
         );
         thread::sleep(time::Duration::from_millis(50));
-        state.controls.set_mode(KeyboardMode::TERRAIN);
+        state.controls.set_mode(KeyboardMode::VIEW);
+    }
+}
+
+fn ray_controls(state: &mut State) {
+    let pressed = state.controls.get_keys();
+    let mut dval_f = 0.0f32;
+
+    if pressed.contains(&PhysicalKey::Code(KeyCode::ArrowUp)) {
+        dval_f = 1.0f32;
+    } else if pressed.contains(&PhysicalKey::Code(KeyCode::ArrowDown)) {
+        dval_f = -1.0f32;
+    }
+
+    if pressed.contains(&PhysicalKey::Code(KeyCode::KeyE)) {
+        let maxv = &mut state.params.ray_params.epsilon;
+        *maxv = f32::max(0f32, *maxv + (1.0 * dval_f));
+        update_ray_params_buffer(state);
+    } else if pressed.contains(&PhysicalKey::Code(KeyCode::KeyS)) {
+        let maxv = &mut state.params.ray_params.max_steps;
+        *maxv = f32::max(0f32, *maxv + (1.0 * dval_f));
+        update_ray_params_buffer(state);
+    } else if pressed.contains(&PhysicalKey::Code(KeyCode::KeyW)) {
+        let maxv = &mut state.params.ray_params.max_dist;
+        *maxv = f32::max(0f32, *maxv + (1.0 * dval_f));
+        update_ray_params_buffer(state);
     }
 }
 
 fn terrain_controls(state: &mut State) {
     let pressed = state.controls.get_keys();
     let mut dval_f = 0.0f32;
-    let mut dval_i = 0i32;
 
     if pressed.contains(&PhysicalKey::Code(KeyCode::ArrowUp)) {
         dval_f = 1.0f32;
-        dval_i = 1;
     } else if pressed.contains(&PhysicalKey::Code(KeyCode::ArrowDown)) {
         dval_f = -1.0f32;
-        dval_i = -1;
     }
 
-    // FBM
-    //  if pressed.contains(&PhysicalKey::Code(KeyCode::Period)) {
-    //      let maxv = &mut state.params.terrain_params.octaves;
-    //      *maxv = i32::max(0i32, *maxv + (1 * dval_i));
-    //      update_terrain_params_buffer(state);
-    //  }
+    println!("terrain controls not done yet");
 }
 
 fn view_controls(state: &mut State) {
