@@ -1,4 +1,7 @@
-use crate::{app::state::State, collections::structs::ViewParams};
+use crate::{
+    app::state::State,
+    collections::structs::{RayParams, ViewParams},
+};
 
 pub(crate) fn update_view_params_buffer(state: &mut State) {
     let new_view_params = ViewParams {
@@ -15,6 +18,20 @@ pub(crate) fn update_view_params_buffer(state: &mut State) {
         &state.buffers.view_params,
         0,
         bytemuck::cast_slice(&[new_view_params]),
+    );
+}
+
+pub(crate) fn update_ray_params_buffer(state: &mut State) {
+    let new_ray_params = RayParams {
+        epsilon: state.params.ray_params.epsilon,
+        max_dist: state.params.ray_params.max_dist,
+        max_steps: state.params.ray_params.max_steps,
+    };
+
+    state.queue.write_buffer(
+        &state.buffers.ray_params,
+        0,
+        bytemuck::cast_slice(&[new_ray_params]),
     );
 }
 
