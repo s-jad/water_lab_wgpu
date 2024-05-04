@@ -40,9 +40,9 @@ pub(crate) fn init_shader_modules(device: &wgpu::Device) -> ShaderModules {
 
 pub(crate) fn init_params() -> Params {
     let ray_params = RayParams {
+        epsilon: 0.01,
+        max_dist: 1500.0,
         max_steps: 2500.0,
-        epsilon: 0.02,
-        max_dist: 500.0,
     };
 
     let view_params = ViewParams {
@@ -52,7 +52,7 @@ pub(crate) fn init_params() -> Params {
         x_rot: 0.0,
         y_rot: 0.0,
         time_modifier: 1.0,
-        fov_degrees: 20.0,
+        fov_degrees: 90.0,
     };
 
     let terrain_params = TerrainParams {
@@ -93,9 +93,9 @@ pub(crate) fn init_buffers(device: &wgpu::Device, params: &Params) -> Buffers {
         &wgpu::util::BufferInitDescriptor {
             label: Some("Ray Marching Parameters Storage Buffer"),
             contents: bytemuck::cast_slice(&[
-                params.ray_params.max_steps,
                 params.ray_params.epsilon,
                 params.ray_params.max_dist,
+                params.ray_params.max_steps,
             ]),
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         },

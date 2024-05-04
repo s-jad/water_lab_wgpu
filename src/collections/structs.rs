@@ -62,9 +62,9 @@ pub(crate) struct Params {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub(crate) struct RayParams {
-    pub(crate) max_steps: f32,
     pub(crate) epsilon: f32,
     pub(crate) max_dist: f32,
+    pub(crate) max_steps: f32,
 }
 
 #[repr(C)]
