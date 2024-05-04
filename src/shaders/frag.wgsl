@@ -30,7 +30,7 @@ const m2Inv: mat2x2<f32> = mat2x2(
 
 struct TimeUniform {
     time: f32,
-};
+}
 struct RayParams {
   epsilon: f32,
   max_dist: f32,
@@ -122,7 +122,7 @@ fn get_light(
   uv: vec2<f32>,
   material: MaterialEnum,
 ) -> vec3<f32> {
-  var light_pos: vec3<f32> = vec3(40.0, 50.0, -500.0);
+  var light_pos: vec3<f32> = vec3(40.0, 100.0, -300.0);
   let color: vec3<f32> = vec3(1.0);
 
   let l: vec3<f32> = normalize(light_pos - pos);
@@ -208,17 +208,22 @@ struct Terrain {
   water_depth: f32,
 }
 
+fn planeSDF(p: vec3<f32>, n: vec3<f32>, h: f32) -> f32 {
+    return dot(p, n) + h;
+}
+
 fn map(pos: vec3<f32>, uv: vec2<f32>) -> Terrain {
+  var d1 = planeSDF(pos, vec3(0.0, 1.0, 0.0), 1.0);
   let tx = textureSample(terrain_tex, terrain_sampler, uv);
-  var d1 = tx.x;
-  var d0 = d1;
-   
-  // Calc water depth for use in render
-  let water_depth = max(0.0, d1 - d0);
-  // Cover lower elevations in water
-  d1 = min(d0, d1);
+  //var d0 = d1;
+  //d1 += tx.x;
+  // 
+  //// Calc water depth for use in render
+  //let water_depth = max(0.0, d1 - d0);
+  //// Cover lower elevations in water
+  //d1 = min(d0, d1);
   
-  return Terrain(vec2(tx.y, tx.z), d1, water_depth);
+  return Terrain(vec2(tx.y, tx.z), d1, 0.0);
 }
 
 // RAY MARCHING
@@ -234,8 +239,9 @@ fn ray_march(ro: vec3<f32>, rd: vec3<f32>, uv: vec2<f32>, look_at: vec3<f32>) ->
   var water_depth = 0.0;
   var grad = vec2(0.0);
   var p = vec3(0.0);
+  let max_steps = i32(rp.max_steps);
 
-  for (var i: i32 = 0; i < MAX_STEPS; i++) {
+  for (var i: i32 = 0; i < max_steps; i++) {
     let pos = ro + dist * rd;
     let t = map(pos, uv);
     let hit = t.dist;
@@ -258,7 +264,7 @@ fn ray_march(ro: vec3<f32>, rd: vec3<f32>, uv: vec2<f32>, look_at: vec3<f32>) ->
 
 // RENDERING
 fn render(uv: vec2<f32>) -> vec3<f32> {
-  var ro: vec3<f32> = vec3(0.0, 0.0, -300.0);
+  var ro: vec3<f32> = vec3(0.0, 20.0, -200.0);
   ro = rotate3d(ro, vp.y_rot, vp.x_rot);
 
   let look_at: vec3<f32> = vec3(0.0, 0.0, 0.0);
@@ -273,11 +279,11 @@ fn render(uv: vec2<f32>) -> vec3<f32> {
   var material = MaterialEnum(0.0, 0.0, 0.0, 0.0);
 
   if (dist < rp.max_dist) {
-    let dist_origin: f32 = length(cam_pos);
+    //let dist_origin: f32 = length(cam_pos);
     material.rock = 1.0;
     col += get_light(cam_pos, rd, uv, material)*ROCK_CLR;
-  }
-  
+  } 
+
   return col;
 }
 
