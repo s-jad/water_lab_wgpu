@@ -1,0 +1,22 @@
+[package]
+name = "water_lab"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+
+[dependencies]
+anyhow = "1.0.82"
+bytemuck = { version = "1.15.0", features = ["derive"] }
+env_logger = "0.11.3"
+futures = "0.3.30"
+log = "0.4.21"
+nalgebra = "0.32.5"
+rand = "0.8.5"
+wgpu = { version = "0.19.3", features = ["api_log_info", "strict_asserts"] }
+winit = "0.29.15"
